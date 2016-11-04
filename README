@@ -1,0 +1,114 @@
+Copyright (C) 2016 Accton Networks, Inc.
+
+This program is free software: you can redistribute it and/or modify
+It under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Contents of this package:
+  patch - files under patch/ is for kernel and ONIE installer                 
+        for the kernel:         
+            config-accton-as7712_32x.patch 
+                    for kernel configuration.
+            driver-i2c-muxes-pca954x-always-deselect.patch 
+                    for i2c_mux deselects after transaction.
+            driver-net-ethernet-intel-igb-v5.2.15.patch 
+                    for management port to work.
+            driver-patches-for-accton-as7712-fan-psu-cpld.patch
+                    for as7712's fan/psu/cpld/led
+        for ONIE:
+            onie_installer-accton-AS7712-32X.patch 
+                    for console port setting and copy util to rootfs.            
+  module - Contains source for kernel driver modules. 
+
+
+To build a kernel that supports docker, do as following steps:
+1. git clone https://github.com/Azure/sonic-linux-kernel
+2. Copy patches and series under patch/ to sonic-linux-kernel/patch.
+3. Run ./build.sh
+
+After kernel is built, goes to sonic-buildimage to pack it to ONIE installer.
+1. git clone https://github.com/Azure/sonic-buildimage    
+2. Run ./get_deps.sh and git submodule update --init --recursive
+3. Copy the output .deb file from sonic-linux-kernel into ./deps
+4. Change console setting for AS7712-32X by patching build_image.sh.
+    patch -p1 < onie_installer-accton-AS7712-32X.patch
+5. Before start building installer, suggest you change to a docker environment.
+   For the build needs to be root and it flush the docker daemon.
+   Check sonic-buildimage/README.md for more details.
+6. ./build_debian.sh "admin" "$(perl -e 'print crypt("YourPaSsWoRd", "salt"),"\n"')"
+7. ./build_image.sh.
+   This may fail due to file changed by patching at step 4.
+   You may consider to comment out the "git status" checking at build_image.sh.
+8. After successful built, the ONIE installer, "acs-generic.bin", is generated.
+
+All Linux kernel code is licensed under the GPLv1. All other code is
+licensed under the GPLv3. Please see the LICENSE file for copies of
+both licenses.
+
+The code for interacting with Accton AS7712-32X has 2 parts, 
+kernel drivers and operational script. 
+The kernel drivers of peripherals are under module/ directory.
+1.  These drivers are patched into kernel by 
+    driver-patches-for-accton-as7712-fan-psu-cpld.patcha
+    Or your can build the driver under module/ by setting environment variable, 
+    KERNEL_SRC, to proper linux built directory and run make. 
+    It may be sonic-linux-kernel/linux-3.*/debian/build/build_amd64_none_amd64/.
+2.  A operational script, accton_as7712_util.py, for device initializatian and 
+    peripheral accessing, should be installed at /usr/bin. 
+    It's done by patching onie_installer-accton-AS7712-32X.patch at build-image.
+    Run "accton_as7712_util.py install" to install drivers.
+
+To initialize the system, run "accton_as7712_util.py install".
+To clean up the drivers & devices, run "accton_as7712_util.py clean".
+To dump information of sensors, run "accton_as7712_util.py show".
+To dump SFP EEPROM, run "accton_as7712_util.py sff".
+To set fan speed, run "accton_as7712_util.py set fan".
+To enable/disable SFP emission, run "accton_as7712_util.py set sfp".
+To set system LEDs' color, run "accton_as7712_util.py set led"
+For more information, run "accton_as7712_util.py --help".
+
+====================================================================
+Besides applying accton_as7712_util.py to access peripherals, you can 
+access peripherals by sysfs nodes directly after the installation is run.
+
+LED controls can be found under /sys/class/leds. The sysfs interface
+color mappings are as follows:
+Brightness:
+  0 => off
+  1 => green
+  2 => amber
+  3 => red
+  4 => blue
+
+There are 5 system LEDs, loc, diag, fan, ps1, and ps2. 
+They are lit automatically by CPLD, but the loc and diag.
+The loc led has only 1 color, blue.
+The diag one has 3 colors: red, amber, and green.
+
+Fan controls can be found in /sys/bus/i2c/devices/2-0066.
+There are 12 fans inside 6 fan modules.
+All fans share 1 duty setting, ranged from 0~100.
+
+Three temperature sensors are controlled by the lm75 kernel modules. 
+They should already be visible under /sys/bus/i2c/drivers/lm75/.
+
+Two power supplies are controlled by the CPLD. 
+Here provide their status under
+/sys/bus/i2c/devices/10-0050 and /sys/bus/i2c/devices/11-0053.
+
+There are 32 QSFP+ modules are equipped. 
+Apply "accton_as7712_util.py show" to get their status. 
+Apply "accton_as7712_util.py set sfp" to turn on/off light transmission.
+Apply "accton_as7712_util.py sff" to dump EEPROM information.
+Before operating on that QSFP+, please make sure it is well plugged. 
+Otherwise, operation is going to fail.
+
