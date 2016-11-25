@@ -1,6 +1,0 @@
-kernel//home/roy_lee/project/sonic/test/AS7712-32X/module/accton_as7712_32x_fan.ko
-kernel//home/roy_lee/project/sonic/test/AS7712-32X/module/accton_as7712_32x_sfp.ko
-kernel//home/roy_lee/project/sonic/test/AS7712-32X/module/leds-accton_as7712_32x.ko
-kernel//home/roy_lee/project/sonic/test/AS7712-32X/module/accton_as7712_32x_psu.ko
-kernel//home/roy_lee/project/sonic/test/AS7712-32X/module/accton_i2c_cpld.ko
-kernel//home/roy_lee/project/sonic/test/AS7712-32X/module/ym2651y.ko
