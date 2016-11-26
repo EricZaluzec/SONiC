@@ -1,3 +1,0 @@
-0x4780b264	accton_i2c_cpld_write	/home/roy_lee/project/sonic/test/AS7712-32X/module/accton_i2c_cpld	EXPORT_SYMBOL
-0x29a3fd3b	platform_accton_as7712_32x	/home/roy_lee/project/sonic/test/AS7712-32X/module/accton_i2c_cpld	EXPORT_SYMBOL
-0x78f78725	accton_i2c_cpld_read	/home/roy_lee/project/sonic/test/AS7712-32X/module/accton_i2c_cpld	EXPORT_SYMBOL
