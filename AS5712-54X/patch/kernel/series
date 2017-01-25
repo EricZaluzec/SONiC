@@ -1,0 +1,3 @@
+config-accton-as5712_54x.patch
+driver-i2c-muxes-pca954x-always-deselect.patch
+driver-patches-for-accton-as5712-fan-psu-cpld-led-sfp.patch
