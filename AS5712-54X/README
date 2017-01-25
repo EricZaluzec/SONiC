@@ -52,7 +52,7 @@ User is not necessary to handle docker environment creation.
     The default user and password are "admin" & "YourPaSsWoRd" respectively.
   - Run "make configure PLATFORM=broadcom"
   - Copy the built kernel debian package to target/debs/.
-    The kernel is linux-image-3.16.0-4-amd64_*_amd64.deb under directory
+    The file is linux-image-3.16.0-4-amd64_*_amd64.deb under directory
     src/sonic-linux-kernel/.
   - Run "make target/sonic-generic.bin"
   - Get the installer, target/sonic-generic.bin, to target machine and install.
@@ -112,9 +112,6 @@ PSUs:
     Once if a PSU is not plugged, the status of it is shown failed.
 
 There are 48 SFP+ and 6 QSFP modules are equipped. 
-Apply "accton_as5712_util.py show" to get their status. 
-Apply "accton_as5712_util.py set sfp" to turn on/off light transmission.
-Apply "accton_as5712_util.py sff" to dump EEPROM information.
-Before operating on that QSFP+, please make sure it is well plugged. 
+Before operating on PSU and QSFP+, please make sure it is well plugged. 
 Otherwise, operation is going to fail.
 
