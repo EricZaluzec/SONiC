@@ -84,9 +84,9 @@ mknod =[
 'echo ym2651 0x5b > /sys/bus/i2c/devices/i2c-11/new_device',
 'echo as7512_32x_psu 0x50 > /sys/bus/i2c/devices/i2c-10/new_device',
 'echo ym2651 0x58 > /sys/bus/i2c/devices/i2c-10/new_device',
-'echo accton_i2c_cpld 0x60 > /sys/bus/i2c/devices/i2c-0/new_device',
-'echo accton_i2c_cpld 0x62 > /sys/bus/i2c/devices/i2c-0/new_device',
-'echo accton_i2c_cpld 0x64 > /sys/bus/i2c/devices/i2c-0/new_device']
+'echo accton_i2c_cpld 0x60 > /sys/bus/i2c/devices/i2c-4/new_device',
+'echo accton_i2c_cpld 0x62 > /sys/bus/i2c/devices/i2c-5/new_device',
+'echo accton_i2c_cpld 0x64 > /sys/bus/i2c/devices/i2c-6/new_device']
 
 mknod2 =[                 
 'echo pca9548 0x76 > /sys/bus/i2c/devices/i2c-1/new_device',
@@ -105,9 +105,9 @@ mknod2 =[
 'echo ym2651 0x5b > /sys/bus/i2c/devices/i2c-11/new_device',
 'echo as7512_32x_psu 0x50 > /sys/bus/i2c/devices/i2c-10/new_device',
 'echo ym2651 0x58 > /sys/bus/i2c/devices/i2c-10/new_device',
-'echo accton_i2c_cpld 0x60 > /sys/bus/i2c/devices/i2c-1/new_device',
-'echo accton_i2c_cpld 0x62 > /sys/bus/i2c/devices/i2c-1/new_device',
-'echo accton_i2c_cpld 0x64 > /sys/bus/i2c/devices/i2c-1/new_device']
+'echo accton_i2c_cpld 0x60 > /sys/bus/i2c/devices/i2c-4/new_device',
+'echo accton_i2c_cpld 0x62 > /sys/bus/i2c/devices/i2c-5/new_device',
+'echo accton_i2c_cpld 0x64 > /sys/bus/i2c/devices/i2c-6/new_device']
  
 
 
