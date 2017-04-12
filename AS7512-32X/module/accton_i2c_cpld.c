@@ -38,7 +38,7 @@ struct cpld_client_node {
 
 /* Addresses scanned for accton_i2c_cpld
  */
-static const unsigned short normal_i2c[] = { 0x31, 0x35, 0x60, 0x61, 0x62, I2C_CLIENT_END };
+static const unsigned short normal_i2c[] = { 0x31, 0x35, 0x60, 0x61, 0x62, 0x64, I2C_CLIENT_END };
 
 static void accton_i2c_cpld_add_client(struct i2c_client *client)
 {
