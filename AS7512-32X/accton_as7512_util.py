@@ -74,6 +74,7 @@ mknod =[
 'echo pca9548 0x73 > /sys/bus/i2c/devices/i2c-1/new_device' ,
 'echo pca9548 0x74 > /sys/bus/i2c/devices/i2c-1/new_device',
 'echo pca9548 0x75 > /sys/bus/i2c/devices/i2c-1/new_device',
+'echo 24c02 0x57 > /sys/bus/i2c/devices/i2c-1/new_device',
 
 'echo as7512_32x_fan 0x66 > /sys/bus/i2c/devices/i2c-2/new_device ',
 'echo lm75 0x48 > /sys/bus/i2c/devices/i2c-3/new_device',
@@ -95,6 +96,7 @@ mknod2 =[
 'echo pca9548 0x73 > /sys/bus/i2c/devices/i2c-0/new_device' ,
 'echo pca9548 0x74 > /sys/bus/i2c/devices/i2c-0/new_device',
 'echo pca9548 0x75 > /sys/bus/i2c/devices/i2c-0/new_device',
+'echo 24c02 0x57 > /sys/bus/i2c/devices/i2c-0/new_device',
 
 'echo as7512_32x_fan 0x66 > /sys/bus/i2c/devices/i2c-2/new_device ',
 'echo lm75 0x48 > /sys/bus/i2c/devices/i2c-3/new_device',
