@@ -223,11 +223,12 @@ static int as7512_32x_fan_write_value(struct i2c_client *client, u8 reg, u8 valu
 static u32 reg_val_to_duty_cycle(u8 reg_val)
 {
 	reg_val &= FAN_DUTY_CYCLE_REG_MASK;
-	return (u32)(reg_val+1) * 625 / 100;
+	return ((u32)(reg_val+1) * 625 + 50)/ 100;
 }
 
 static u8 duty_cycle_to_reg_val(u8 duty_cycle)
 {
+	duty_cycle = (duty_cycle < 7) ? 7 : duty_cycle;
 	return ((u32)duty_cycle * 100 / 625) - 1;
 }
 
