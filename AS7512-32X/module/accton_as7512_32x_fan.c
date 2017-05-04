@@ -34,7 +34,11 @@
 
 static struct as7512_32x_fan_data *as7512_32x_fan_update_device(struct device *dev);
 static ssize_t fan_show_value(struct device *dev, struct device_attribute *da, char *buf);
+static ssize_t fan_show_pwm_value(struct device *dev, struct device_attribute *da,
+			 char *buf);
 static ssize_t set_duty_cycle(struct device *dev, struct device_attribute *da,
+			const char *buf, size_t count);
+static ssize_t set_pwm_duty_cycle(struct device *dev, struct device_attribute *da,
 			const char *buf, size_t count);
 extern int accton_i2c_cpld_read(unsigned short cpld_addr, u8 reg);
 extern int accton_i2c_cpld_write(unsigned short cpld_addr, u8 reg, u8 value);
@@ -127,6 +131,10 @@ enum sysfs_fan_attributes {
 	static SENSOR_DEVICE_ATTR(fan##index##_duty_cycle_percentage, S_IWUSR | S_IRUGO, fan_show_value, set_duty_cycle, FAN##index##_DUTY_CYCLE_PERCENTAGE)
 #define DECLARE_FAN_DUTY_CYCLE_ATTR(index) &sensor_dev_attr_fan##index##_duty_cycle_percentage.dev_attr.attr
 
+#define DECLARE_FAN_PWM_DEV_ATTR(index) \
+	static SENSOR_DEVICE_ATTR(fan##index##_pwm, S_IWUSR | S_IRUGO, fan_show_pwm_value, set_pwm_duty_cycle, FAN##index##_DUTY_CYCLE_PERCENTAGE)
+#define DECLARE_FAN_PWM_ATTR(index) &sensor_dev_attr_fan##index##_pwm.dev_attr.attr
+
 #define DECLARE_FAN_PRESENT_SENSOR_DEV_ATTR(index) \
 	static SENSOR_DEVICE_ATTR(fan##index##_present, S_IRUGO, fan_show_value, NULL, FAN##index##_PRESENT)
 #define DECLARE_FAN_PRESENT_ATTR(index)	  &sensor_dev_attr_fan##index##_present.dev_attr.attr
@@ -171,6 +179,8 @@ DECLARE_FAN_PRESENT_SENSOR_DEV_ATTR(5);
 DECLARE_FAN_PRESENT_SENSOR_DEV_ATTR(6);
 /* 1 fan duty cycle attribute in this platform */
 DECLARE_FAN_DUTY_CYCLE_SENSOR_DEV_ATTR();
+/* 1 fan duty cycle attribute that allow pwm max value*/
+DECLARE_FAN_PWM_DEV_ATTR();
 
 static struct attribute *as7512_32x_fan_attributes[] = {
 	/* fan related attributes */
@@ -201,11 +211,13 @@ static struct attribute *as7512_32x_fan_attributes[] = {
 	DECLARE_FAN_PRESENT_ATTR(5),
 	DECLARE_FAN_PRESENT_ATTR(6),
 	DECLARE_FAN_DUTY_CYCLE_ATTR(),
+	DECLARE_FAN_PWM_ATTR(),
 	NULL
 };
 
 #define FAN_DUTY_CYCLE_REG_MASK		 	0x0F
 #define FAN_MAX_DUTY_CYCLE			  	100
+#define FAN_MAX_DUTY_CYCLE_PWM			255
 #define FAN_REG_VAL_TO_SPEED_RPM_STEP   100
 
 static int as7512_32x_fan_read_value(struct i2c_client *client, u8 reg)
@@ -230,6 +242,17 @@ static u8 duty_cycle_to_reg_val(u8 duty_cycle)
 {
 	duty_cycle = (duty_cycle < 7) ? 7 : duty_cycle;
 	return ((u32)duty_cycle * 100 / 625) - 1;
+}
+
+static u8 duty_cycle_pwm_to_reg_val(u8 duty_cycle)
+{
+	return ((u32)duty_cycle  / 16);
+}
+
+static u32 reg_val_to_pwm_duty_cycle(u8 reg_val)
+{
+	reg_val &= FAN_DUTY_CYCLE_REG_MASK;
+	return (u32)reg_val * 16;
 }
 
 static u32 reg_val_to_speed_rpm(u8 reg_val)
@@ -271,6 +294,39 @@ static u8 is_fan_fault(struct as7512_32x_fan_data *data, enum fan_id id)
 	return ret;
 }
 
+
+
+static ssize_t set_pwm_duty_cycle(struct device *dev, struct device_attribute *da,
+			const char *buf, size_t count)
+{
+	int error, value;
+	struct i2c_client *client = to_i2c_client(dev);
+	struct as7512_32x_fan_data *data = i2c_get_clientdata(client);
+
+	error = kstrtoint(buf, 10, &value);
+	if (error) {
+		return error;
+	}
+
+	if (value < 0 || value > FAN_MAX_DUTY_CYCLE_PWM) {
+		return -EINVAL;
+	}
+
+	/* Disable the watchdog timer
+	 */
+	error = as7512_32x_fan_write_value(client, 0x33, 0);
+
+	if (error != 0) {
+		dev_dbg(&client->dev, "Unable to disable the watchdog timer\n");
+		return error;
+	}
+
+	as7512_32x_fan_write_value(client, fan_reg[FAN_DUTY_CYCLE_PERCENTAGE], duty_cycle_pwm_to_reg_val(value));
+	data->valid = 0;
+
+	return count;
+}
+
 static ssize_t set_duty_cycle(struct device *dev, struct device_attribute *da,
 			const char *buf, size_t count)
 {
@@ -300,6 +356,25 @@ static ssize_t set_duty_cycle(struct device *dev, struct device_attribute *da,
 	data->valid = 0;
 
 	return count;
+}
+
+static ssize_t fan_show_pwm_value(struct device *dev, struct device_attribute *da,
+			 char *buf)
+{
+	struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
+	struct as7512_32x_fan_data *data = as7512_32x_fan_update_device(dev);
+	ssize_t ret = 0;
+
+	if(attr->index != FAN_DUTY_CYCLE_PERCENTAGE)
+		return ret;
+
+	if (data->valid)
+	{
+		u32 duty_cycle = reg_val_to_pwm_duty_cycle(data->reg_val[FAN_DUTY_CYCLE_PERCENTAGE]);
+		ret = sprintf(buf, "%u\n", duty_cycle);
+	}
+
+	return ret;
 }
 
 static ssize_t fan_show_value(struct device *dev, struct device_attribute *da,
