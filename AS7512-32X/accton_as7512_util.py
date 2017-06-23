@@ -223,7 +223,7 @@ def driver_inserted():
 
 kos = [
 'modprobe i2c_dev',
-'modprobe i2c_mux_pca954x',
+'modprobe i2c_mux_pca954x force_deselect_on_exit=1',
 'modprobe accton_i2c_cpld'  ,
 'modprobe accton_as7512_32x_fan'     ,
 'modprobe accton_as7512_32x_sfp'      ,
